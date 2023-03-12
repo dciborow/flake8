@@ -63,8 +63,7 @@ def _tokenize_files_to_codes_mapping(value: str) -> list[_Token]:
     i = 0
     while i < len(value):
         for token_re, token_name in _FILE_LIST_TOKEN_TYPES:
-            match = token_re.match(value, i)
-            if match:
+            if match := token_re.match(value, i):
                 tokens.append(_Token(token_name, match.group().strip()))
                 i = match.end()
                 break
@@ -86,11 +85,7 @@ def parse_files_to_codes_mapping(  # noqa: C901
 
     :param value: String to be parsed and normalized.
     """
-    if not isinstance(value_, str):
-        value = "\n".join(value_)
-    else:
-        value = value_
-
+    value = value_ if isinstance(value_, str) else "\n".join(value_)
     ret: list[tuple[str, list[str]]] = []
     if not value.strip():
         return ret
@@ -224,9 +219,11 @@ def fnmatch(filename: str, patterns: Sequence[str]) -> bool:
         True if a pattern matches the filename, False if it doesn't.
         ``True`` if patterns is empty.
     """
-    if not patterns:
-        return True
-    return any(_fnmatch.fnmatch(filename, pattern) for pattern in patterns)
+    return (
+        any(_fnmatch.fnmatch(filename, pattern) for pattern in patterns)
+        if patterns
+        else True
+    )
 
 
 def matches_filename(
@@ -268,11 +265,7 @@ def get_python_version() -> str:
     :returns:
         Implementation name, version, and platform as a string.
     """
-    return "{} {} on {}".format(
-        platform.python_implementation(),
-        platform.python_version(),
-        platform.system(),
-    )
+    return f"{platform.python_implementation()} {platform.python_version()} on {platform.system()}"
 
 
 def normalize_pypi_name(s: str) -> str:
